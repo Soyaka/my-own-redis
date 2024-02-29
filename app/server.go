@@ -32,8 +32,10 @@ func handleConnection(conn net.Conn) {
 	scanner := bufio.NewScanner(conn)
 	for scanner.Scan() {
 		command := scanner.Text()
-		response := "+PONG\r\n"
-		conn.Write([]byte(response))
-		fmt.Printf("Received: %s, Sent: %s", command, response)
+		if command != "" {
+			response := "+PONG\r\n"
+			conn.Write([]byte(response))
+			fmt.Printf("Received: %s, Sent: %s", command, response)
+		}
 	}
 }
