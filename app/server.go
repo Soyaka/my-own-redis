@@ -33,7 +33,7 @@ func handleConnection(conn net.Conn) {
 	for scanner.Scan() {
 		command := scanner.Text()
 		if command != "" {
-			response := "+PONG\r\n"
+			response := "+PONG\n"
 			conn.Write([]byte(response))
 			fmt.Printf("Received: %s, Sent: %s", command, response)
 		}
