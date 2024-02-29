@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"net"
+	"strings"
 )
 
 func main() {
@@ -32,7 +33,7 @@ func handleConnection(conn net.Conn) {
 	scanner := bufio.NewScanner(conn)
 	for scanner.Scan() {
 		command := scanner.Text()
-		if command != "" {
+		if strings.ToUpper(command) == "PING" {
 			response := "+PONG\r\n"
 			conn.Write([]byte(response))
 			fmt.Printf("Received: %s, Sent: %s", command, response)
