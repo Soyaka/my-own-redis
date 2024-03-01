@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"net"
+	"strconv"
 	"strings"
 )
 
@@ -39,4 +40,35 @@ func handleConnection(conn net.Conn) {
 			fmt.Printf("Received: %s, Sent: %s", command, response)
 		}
 	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+type RESPParser struct{}
+
+func (RS *RESPParser) stringParser(RespString string) (string, string) {
+	if strings.HasPrefix(RespString, "$") {
+		parts := strings.SplitN(RespString, "\r\n", 2)
+		_, err := strconv.Atoi(parts[0])
+		if err!= nil{
+			return "", RespString
+		}
+
+		data:= parts[1]
+		fmt.Println(data)
+
+	}
+	
+
+	return "", ""
+
 }
