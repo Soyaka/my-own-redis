@@ -64,7 +64,7 @@ func handleDecode(buff string) []string {
 func handleCommand(elements []string) string {
 	switch strings.ToLower(elements[0]) {
 	case "echo":
-		return "+" + elements[1] + "\r\n"
+		return "+" + strings.Join(elements[1:],"") + "\r\n"
 	case "ping":
 		return "+PONG\r\n"
 	}
