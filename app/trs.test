@@ -1,0 +1,146 @@
+// package main
+
+// import (
+// 	"bufio"
+// 	"fmt"
+// 	"net"
+// 	"strconv"
+// 	"strings"
+// 	"sync"
+// )
+
+// type RESPParser struct{}
+
+// var wg sync.WaitGroup
+
+// func main() {
+// 	listener, err := net.Listen("tcp", ":6379")
+// 	if err != nil {
+// 		fmt.Println("Error:", err)
+// 		return
+// 	}
+// 	defer listener.Close()
+
+// 	fmt.Println("Listening on :6379...")
+// 	for {
+// 		conn, err := listener.Accept()
+// 		if err != nil {
+// 			fmt.Println("Error:", err)
+// 			continue
+// 		}
+// 		wg.Add(1)
+
+// 		go handleConnection(conn)
+
+// 	}
+// 	wg.Wait()
+
+// }
+
+// func handleConnection(conn net.Conn) {
+// 	defer func() {
+// 		conn.Close()
+// 		wg.Done()
+// 	}()
+
+// 	fmt.Println("Accepted connection from:", conn.RemoteAddr())
+// 	scanner := bufio.NewScanner(conn)
+// 	for scanner.Scan() {
+// 		command := scanner.Text()
+
+// 		Resper := RESPParser{}
+// 		elements, _ := Resper.parse(command)
+// 		if elements != nil {
+// 			switch val := elements.(type) {
+// 			case []interface{}:
+// 				if len(val) > 0 {
+// 					switch strings.ToLower(val[0].(string)) {
+// 					case "echo":
+// 						response := "is is echo string"
+// 						conn.Write([]byte(response))
+
+// 					case "ping":
+// 						response := "+PONG\r\n"
+// 						conn.Write([]byte(response))
+// 					}
+
+// 				}
+// 			case string:
+// 				response := "+PONG\r\n"
+// 				conn.Write([]byte(response))
+// 			}
+
+// 		}
+
+// 		// if strings.ToUpper(command) == "PING" {
+// 		// 	response := "+PONG\r\n"
+// 		// 	conn.Write([]byte(response))
+// 		// 	fmt.Printf("Received: %s, Sent: %s", command, response)
+// 		// }
+// 	}
+// }
+
+// // func (RS *RESPParser) parse(RespSting string) (element interface{}, remain string) {
+// // 	if RespSting == "" {
+// // 		return nil, RespSting
+// // 	}
+// // 	switch RespSting[0] {
+// // 	case '$':
+// // 		return RS.stringParser(RespSting)
+// // 	case '*':
+// // 		return RS.listParser(RespSting)
+// // 	}
+// // 	return nil, RespSting
+// // }
+
+// func (RS *RESPParser) stringParser(RespString string) (string, string) {
+// 	if strings.HasPrefix(RespString, "$") {
+// 		parts := strings.SplitN(RespString[1:], "\r\n", 2)
+// 		leng, err := strconv.Atoi(parts[0])
+
+// 		if err != nil {
+// 			return "", RespString
+// 		}
+// 		data := parts[1]
+
+// 		if len(data) >= leng+2 {
+// 			return data[:leng], data[leng+2:]
+// 		}
+// 	}
+
+// 	return "", RespString
+
+// }
+
+// func (RS *RESPParser) listParser(RespString string) ([]interface{}, string) {
+// 	if strings.HasPrefix(RespString, "*") {
+// 		// Find the end of the count part
+// 		countEnd := strings.Index(RespString[1:], "\r\n")
+// 		if countEnd == -1 {
+// 			return nil, RespString
+// 		}
+
+// 		// Parse the count
+// 		count, err := strconv.Atoi(RespString[1 : countEnd+1])
+// 		if err != nil {
+// 			return nil, RespString
+// 		}
+
+// 		data := RespString[countEnd+3:]
+// 		elements := make([]interface{}, count)
+
+// 		for i := 0; i < count; i++ {
+// 			// Check if there is enough data left to parse
+// 			if len(data) < 2 {
+// 				return nil, RespString
+// 			}
+
+// 			element, remainingData := RS.parse(data)
+// 			elements[i] = element
+// 			data = remainingData
+// 		}
+// 		return elements, data
+// 	}
+
+// 	return nil, RespString
+//

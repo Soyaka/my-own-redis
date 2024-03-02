@@ -1,10 +1,8 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"net"
-	"strconv"
 	"strings"
 )
 
@@ -24,51 +22,50 @@ func main() {
 			continue
 		}
 		go handleConnection(conn)
+
 	}
 }
 
 func handleConnection(conn net.Conn) {
-	defer conn.Close()
-
-	fmt.Println("Accepted connection from:", conn.RemoteAddr())
-	scanner := bufio.NewScanner(conn)
-	for scanner.Scan() {
-		command := scanner.Text()
-		if strings.ToUpper(command) == "PING" {
-			response := "+PONG\r\n"
-			conn.Write([]byte(response))
-			fmt.Printf("Received: %s, Sent: %s", command, response)
+	defer func() {
+		conn.Close()
+	}()
+	for {
+		buf := make([]byte, 1024)
+		_, err := conn.Read(buf)
+		if err != nil {
+			conn.Close()
+			continue
 		}
+		response := handleCommand(handleDecode(string(buf)))
+		_, err = conn.Write([]byte(response))
+		if err != nil {
+			conn.Close()
+			break
+		}
+
 	}
 }
 
-
-
-
-
-
-
-
-
-
-
-
-type RESPParser struct{}
-
-func (RS *RESPParser) stringParser(RespString string) (string, string) {
-	if strings.HasPrefix(RespString, "$") {
-		parts := strings.SplitN(RespString, "\r\n", 2)
-		_, err := strconv.Atoi(parts[0])
-		if err!= nil{
-			return "", RespString
+func handleDecode(buff string) []string {
+	args := strings.Split(buff, "\r\n")
+	netArgs := []string{}
+	for i := 0; i < len(args); i++ {
+		if strings.HasPrefix(args[i], "*") || strings.HasPrefix(args[i], "$") {
+			i++
+		} else {
+			netArgs = append(netArgs, args[i])
 		}
-
-		data:= parts[1]
-		fmt.Println(data)
-
 	}
-	
+	return netArgs
+}
 
-	return "", ""
-
+func handleCommand(elements []string) string {
+	switch strings.ToLower(elements[0]) {
+	case "echo":
+		return strings.Join(elements[1:], " ")
+	case "ping":
+		return "+PONG\r\n"
+	}
+	return ""
 }
