@@ -40,6 +40,7 @@ func handleConnection(conn net.Conn) {
 		}
 		response := handleCommand(handleDecode(string(buf)))
 		_, err = conn.Write([]byte(response))
+		conn.Close()
 		if err != nil {
 			conn.Close()
 			break
