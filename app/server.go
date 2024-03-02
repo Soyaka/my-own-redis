@@ -64,7 +64,9 @@ func handleDecode(buff string) []string {
 func handleCommand(elements []string) string {
 	switch strings.ToLower(elements[0]) {
 	case "echo":
-		return strings.Join(elements[1:], "\r\n")
+		response := fmt.Sprintf("$%d\r\n%s\r\n", len(strings.Join(elements[1:], " ")), strings.Join(elements[1:], " "))
+		return response
+
 	case "ping":
 		return "+PONG\r\n"
 	}
