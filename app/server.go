@@ -30,9 +30,10 @@ func handleConnection(conn net.Conn) {
 	defer func() {
 		conn.Close()
 	}()
-	buf := make([]byte, 1024)
-
+	
 	for {
+		buf := make([]byte, 1024)
+
 		len, err := conn.Read(buf)
 
 		if err != nil {
