@@ -39,8 +39,8 @@ func handleConnection(conn net.Conn) {
 			conn.Close()
 			continue
 		}
-
-		response := handleCommand(handleDecode(string(buf[0 : len-1])))
+		input := buf[:len]
+		response := handleCommand(handleDecode(string(input)))
 		_, err = conn.Write([]byte(response))
 		if err != nil {
 			conn.Close()
