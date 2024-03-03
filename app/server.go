@@ -52,7 +52,7 @@ func handleConnection(conn net.Conn) {
 
 func handleDecode(buff string) []string {
 	args := strings.Fields(buff)
-	if strings.Contains(args[0],"*"){
+	if strings.Contains(args[0], "*") {
 		args = args[1:]
 	}
 	return args
@@ -65,7 +65,7 @@ func handleCommand(elements []string) string {
 	case "ping":
 		return "+PONG\r\n"
 	}
-	return "inavalid input"
+	return "-ERR"
 }
 
 func EncodeResponse(resSlice []string) (resString string) {
