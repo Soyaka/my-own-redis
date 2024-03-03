@@ -41,7 +41,6 @@ func handleConnection(conn net.Conn) {
 		}
 
 		response := handleCommand(handleDecode(string(buf[0 : len-1])))
-		fmt.Println(response)
 		_, err = conn.Write([]byte(response))
 		if err != nil {
 			conn.Close()
@@ -53,17 +52,15 @@ func handleConnection(conn net.Conn) {
 
 func handleDecode(buff string) []string {
 	args := strings.Fields(buff)
-	if len(args) > 2 {
+	if strings.Contains(args[0],"*"){
 		args = args[1:]
 	}
 	return args
 }
 
 func handleCommand(elements []string) string {
-	fmt.Println(elements[0])
 	switch strings.ToLower(elements[0]) {
 	case "echo":
-		fmt.Println("+" + strings.Join(elements[1:], "") + "\r\n")
 		return EncodeResponse(elements[1:])
 	case "ping":
 		return "+PONG\r\n"
