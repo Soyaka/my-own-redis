@@ -33,12 +33,15 @@ func handleConnection(conn net.Conn) {
 	buf := make([]byte, 1024)
 
 	for {
-		_, err := conn.Read(buf)
+		len, err := conn.Read(buf)
+
 		if err != nil {
 			conn.Close()
 			continue
 		}
-		response := handleCommand(handleDecode(string(buf)))
+
+		response := handleCommand(handleDecode(string(buf[0 : len-1])))
+		fmt.Println(response)
 		_, err = conn.Write([]byte(response))
 		if err != nil {
 			conn.Close()
@@ -49,25 +52,33 @@ func handleConnection(conn net.Conn) {
 }
 
 func handleDecode(buff string) []string {
-	args := strings.Split(buff, "\r\n")
-	netArgs := []string{}
-	for i := 0; i < len(args); i++ {
-		if strings.HasPrefix(args[i], "*") || strings.HasPrefix(args[i], "$") || strings.Contains(args[i], " ") {
-			i++
-		} else {
-			netArgs = append(netArgs, args[i])
-		}
+	args := strings.Fields(buff)
+	if len(args) > 2 {
+		args = args[1:]
 	}
-	return netArgs
+	return args
 }
 
 func handleCommand(elements []string) string {
-	
+	fmt.Println(elements[0])
 	switch strings.ToLower(elements[0]) {
 	case "echo":
-		return "+" + strings.Join(elements[1:], "") + "\r\n"
+		fmt.Println("+" + strings.Join(elements[1:], "") + "\r\n")
+		return EncodeResponse(elements[1:])
 	case "ping":
 		return "+PONG\r\n"
 	}
-	return "non"
+	return "inavalid input"
+}
+
+func EncodeResponse(resSlice []string) (resString string) {
+	if len(resSlice) == 1 {
+		resString = "$" + fmt.Sprint(len(resSlice[0])) + "\r\n" + resSlice[0] + "\r\n"
+	} else if len(resSlice) > 1 {
+		resString = "*" + fmt.Sprint(len(resSlice)) + "\r\n"
+		for _, element := range resSlice {
+			resString += "$" + fmt.Sprint(len(element)) + "\r\n" + element + "\r\n"
+		}
+	}
+	return resString
 }
