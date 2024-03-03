@@ -40,7 +40,6 @@ func handleConnection(conn net.Conn) {
 		}
 		response := handleCommand(handleDecode(string(buf)))
 		_, err = conn.Write([]byte(response))
-		conn.Close()
 		if err != nil {
 			conn.Close()
 			break
@@ -53,7 +52,7 @@ func handleDecode(buff string) []string {
 	args := strings.Split(buff, "\r\n")
 	netArgs := []string{}
 	for i := 0; i < len(args); i++ {
-		if strings.HasPrefix(args[i], "*") || strings.HasPrefix(args[i], "$") {
+		if strings.HasPrefix(args[i], "*") || strings.HasPrefix(args[i], "$") || strings.Contains(args[i], " ") {
 			i++
 		} else {
 			netArgs = append(netArgs, args[i])
@@ -63,11 +62,12 @@ func handleDecode(buff string) []string {
 }
 
 func handleCommand(elements []string) string {
+	
 	switch strings.ToLower(elements[0]) {
 	case "echo":
-		return "+" + strings.Join(elements[1:],"") + "\r\n"
+		return "+" + strings.Join(elements[1:], "") + "\r\n"
 	case "ping":
 		return "+PONG\r\n"
 	}
-	return ""
+	return "non"
 }
