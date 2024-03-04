@@ -26,11 +26,11 @@ func main() {
 	}
 }
 
-func handleConnection(conn net.Conn) {
+func handleConnection(conn net.Conn) { //1
 	defer func() {
 		conn.Close()
 	}()
-	
+
 	for {
 		buf := make([]byte, 1024)
 
@@ -41,6 +41,7 @@ func handleConnection(conn net.Conn) {
 			continue
 		}
 		input := buf[:len]
+
 		response := handleCommand(handleDecode(string(input)))
 		_, err = conn.Write([]byte(response))
 		if err != nil {
@@ -53,23 +54,33 @@ func handleConnection(conn net.Conn) {
 
 func handleDecode(buff string) []string {
 	args := strings.Fields(buff)
-	if strings.Contains(args[0], "*") {
+	if buff == "ping\n" || buff == "*1\r\n\r\nping\r\n\n" {
+		//return "+PONG\r\n"
+		retrn := make([]string, 1)
+		retrn[0] = "PING"
+		return retrn
+
+	}else if strings.Contains(args[0], "*") {
 		args = args[1:]
 	}
+	
 	return args
 }
 
-func handleCommand(elements []string) string {
+func handleCommand(elements []string) string { //3
 	switch strings.ToLower(elements[0]) {
-	case "echo":
-		return EncodeResponse(elements[1:])
 	case "ping":
 		return "+PONG\r\n"
+
+	case "echo":
+		return EncodeResponse(elements[1:])
+
 	}
-	return "-ERR"
+	return "-err"
+
 }
 
-func EncodeResponse(resSlice []string) (resString string) {
+func EncodeResponse(resSlice []string) (resString string) { //4
 	if len(resSlice) == 1 {
 		resString = "$" + fmt.Sprint(len(resSlice[0])) + "\r\n" + resSlice[0] + "\r\n"
 	} else if len(resSlice) > 1 {
