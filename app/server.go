@@ -3,11 +3,17 @@ package main
 import (
 	"fmt"
 	"net"
-	"strings"
+
+	"github.com/codecrafters-io/redis-starter-go/app/lib/parser"
+)
+
+const (
+	TCP  = "tcp"
+	PORT = ":6379"
 )
 
 func main() {
-	listener, err := net.Listen("tcp", ":6379")
+	listener, err := net.Listen(TCP, PORT)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
@@ -26,7 +32,7 @@ func main() {
 	}
 }
 
-func handleConnection(conn net.Conn) { //1
+func handleConnection(conn net.Conn) {
 	defer func() {
 		conn.Close()
 	}()
@@ -40,54 +46,14 @@ func handleConnection(conn net.Conn) { //1
 			conn.Close()
 			continue
 		}
-		input := buf[:len]
-
-		response := handleCommand(handleDecode(string(input)))
-		_, err = conn.Write([]byte(response))
+		SlimBuf := parser.WhiteSpaceTrimmer(string(buf[:len]))
+		DecodedBuf := parser.BulkDecoder(SlimBuf)
+		Resp := parser.CommandChecker(DecodedBuf)
+		_, err = conn.Write([]byte(Resp))
 		if err != nil {
 			conn.Close()
-			break
+			continue
 		}
 
 	}
-}
-
-func handleDecode(buff string) []string {
-	args := strings.Fields(buff)
-	if buff == "ping\n" || buff == "*1\r\n\r\nping\r\n\n" {
-		//return "+PONG\r\n"
-		retrn := make([]string, 1)
-		retrn[0] = "PING"
-		return retrn
-
-	}else if strings.Contains(args[0], "*") {
-		args = args[1:]
-	}
-	
-	return args
-}
-
-func handleCommand(elements []string) string { //3
-	switch strings.ToLower(elements[0]) {
-	case "ping":
-		return "+PONG\r\n"
-
-	case "echo":
-		return EncodeResponse(elements[1:])
-
-	}
-	return "-err"
-
-}
-
-func EncodeResponse(resSlice []string) (resString string) { //4
-	if len(resSlice) == 1 {
-		resString = "$" + fmt.Sprint(len(resSlice[0])) + "\r\n" + resSlice[0] + "\r\n"
-	} else if len(resSlice) > 1 {
-		resString = "*" + fmt.Sprint(len(resSlice)) + "\r\n"
-		for _, element := range resSlice {
-			resString += "$" + fmt.Sprint(len(element)) + "\r\n" + element + "\r\n"
-		}
-	}
-	return resString
 }
