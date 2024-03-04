@@ -5,6 +5,7 @@ import (
 	"net"
 
 	"github.com/codecrafters-io/redis-starter-go/app/lib/parser"
+	"github.com/codecrafters-io/redis-starter-go/app/lib/store"
 )
 
 const (
@@ -19,7 +20,7 @@ func main() {
 		return
 	}
 	defer listener.Close()
-
+	Storage := store.NewStorage()
 	fmt.Println("Listening on :6379...")
 	for {
 		conn, err := listener.Accept()
@@ -27,12 +28,12 @@ func main() {
 			fmt.Println("Error:", err)
 			continue
 		}
-		go handleConnection(conn)
+		go handleConnection(conn, Storage)
 
 	}
 }
 
-func handleConnection(conn net.Conn) {
+func handleConnection(conn net.Conn, Storage *store.Storage) {
 	defer func() {
 		conn.Close()
 	}()
@@ -48,7 +49,7 @@ func handleConnection(conn net.Conn) {
 		}
 		SlimBuf := parser.WhiteSpaceTrimmer(string(buf[:len]))
 		DecodedBuf := parser.BulkDecoder(SlimBuf)
-		Resp := parser.CommandChecker(DecodedBuf)
+		Resp := parser.CommandChecker(Storage, DecodedBuf)
 		_, err = conn.Write([]byte(Resp))
 		if err != nil {
 			conn.Close()

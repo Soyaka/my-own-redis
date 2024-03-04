@@ -1,20 +1,22 @@
 package parser
 
 import (
-	"fmt"
 	"strings"
 )
 
 const (
-	SEPARATOR = "\r\n"
-	PLUS      = "+"
-	MINUS     = "-"
-	DOLLAR    = "$"
-	STAR      = "*"
-	PING      = "PING"
-	PONG      = "PONG"
-	ECHO      = "ECHO"
-	ERR       = "INVALID"
+	SEPARATOR string = "\r\n"
+	PLUS      string = "+"
+	MINUS     string = "-"
+	DOLLAR    string = "$"
+	STAR      string = "*"
+	PING      string = "PING"
+	PONG      string = "+PONG\r\n"
+	ECHO      string = "ECHO"
+	SET       string = "SET"
+	GET       string = "GET"
+	OK        string = "+OK\r\n"
+	NON       string = "$-1\r\n"
 )
 
 //1
@@ -38,20 +40,3 @@ func BulkDecoder(args []string) []string {
 }
 
 //3
-
-func CommandChecker(elements []string) string {
-	switch strings.ToUpper(elements[0]) {
-	case PING:
-		return fmt.Sprint(PLUS, PONG, SEPARATOR)
-	case ECHO:
-		var response string 
-		if len(elements) > 2 {
-			response = fmt.Sprint(STAR, len(elements)-1, SEPARATOR)
-		}
-		for _, element := range elements[1:] {
-			response += fmt.Sprint(DOLLAR, len(element), SEPARATOR, element, SEPARATOR)
-			return response
-		}
-	}
-	return ERR
-}
