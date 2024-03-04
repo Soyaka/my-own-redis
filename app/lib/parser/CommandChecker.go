@@ -2,7 +2,9 @@ package parser
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/codecrafters-io/redis-starter-go/app/lib/store"
 )
@@ -22,7 +24,16 @@ func CommandChecker(s *store.Storage, elements []string) string {
 
 		}
 	case SET:
-		s.SetValue(elements[1], elements[2])
+		_expire, err := strconv.Atoi(elements[4])
+		if err != nil {
+			response = NON
+		}
+		expireDuration := time.Duration(_expire) * time.Microsecond
+		data := store.Data{
+			Value:    elements[2],
+			ExpireAt: time.Now().Add(expireDuration),
+		}
+		s.SetValue(elements[1], data)
 		response = OK
 	case GET:
 		value, ok := s.GetValue(elements[1])

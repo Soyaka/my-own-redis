@@ -1,10 +1,17 @@
 package store
 
+import "time"
+
 // import "sync"
 
 type Storage struct {
 	// mu    *sync.RWMutex
-	Store map[string]string
+	Store map[string]Data
+}
+
+type Data struct {
+	Value     string
+	ExpireAt time.Time
 }
 
 type StoreWorker interface {
@@ -14,22 +21,24 @@ type StoreWorker interface {
 
 func NewStorage() *Storage {
 	return &Storage{
-		Store: make(map[string]string),
+		Store: make(map[string]Data),
 	}
 }
 
 func (s *Storage) GetValue(key string) (string, bool) {
 	//s.mu.RLock()
-	value, OK := s.Store[key]
-	//s.mu.RUnlock()
-	if !OK {
+	// defer s.mu.RUnlock()
+
+	data, OK := s.Store[key]
+	if !OK || !time.Now().Before(data.ExpireAt) {
 		return "", OK
 	}
-	return value, OK
+	return data.Value, OK
 }
 
-func (s *Storage) SetValue(key, value string) {
+func (s *Storage) SetValue(key string, data Data) {
 	//s.mu.Lock()
-	s.Store[key] = value
-	//s.mu.Unlock()
+	//defer s.mu.Unlock()
+	s.Store[key] = data
+	
 }
