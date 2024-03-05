@@ -37,7 +37,7 @@ func (s *Storage) GetValue(key string) (string, bool) {
 	data, OK := s.Store[key]
 	//s.mu.RUnlock()
 	if !OK || data.ExpriredAt.Before(time.Now()) {
-		return "", OK
+		return "", false
 	}
 	return data.Value, OK
 }
