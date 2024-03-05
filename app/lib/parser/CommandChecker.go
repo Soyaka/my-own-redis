@@ -13,73 +13,76 @@ func CommandChecker(s *store.Storage, elements []string) string {
 	var response string
 	switch strings.ToUpper(elements[0]) {
 	case PING:
-		return fmt.Sprint(PONG)
+		response = fmt.Sprint(PONG)
 	case ECHO:
-
-		if len(elements) > 2 {
-			response = fmt.Sprint(STAR, len(elements)-1, SEPARATOR)
-		}
-		for _, element := range elements[1:] {
-			response += fmt.Sprint(DOLLAR, len(element), SEPARATOR, element, SEPARATOR)
-		}
+		response = handleECHO(elements)
 	case SET:
-		SETlen := len(elements)
-		switch SETlen {
-		case 3:
-
-		}
-		//TODO: //add the SET logic
-		// _expire, err := strconv.Atoi(elements[4])
-		// if err != nil {
-		// 	response = NON
-		// }
-		// expireDuration := time.Duration(_expire) * time.Microsecond
-		// data := store.Data{
-		// 	Value:    elements[2],
-		// 	ExpireAt: time.Now().Add(expireDuration),
-		// }
-		// s.SetValue(elements[1], data)
-		// response = OK
 		response = handleSET(s, elements)
 	case GET:
-		value, ok := s.GetValue(elements[1])
-		if !ok {
-			response = NON
-		} else {
-			response = fmt.Sprint(DOLLAR, len(value), SEPARATOR, value, SEPARATOR)
-		}
+		response = handleGET(s, elements)
 	}
 	return response
 }
 
-//FIXME: fix the bew function : set appropriate time
+func handleECHO(elements []string) string {
+	var response string
+	if len(elements) > 2 {
+		return fmt.Sprint(STAR, len(elements)-1, SEPARATOR)
+	}
+	for _, element := range elements[1:] {
+		response += fmt.Sprint(DOLLAR, len(element), SEPARATOR, element, SEPARATOR)
+	}
+	return response
 
-func handleSET(s *store.Storage, args []string) string {
-	var expirationTime time.Time
+}
 
-	var key string = args[1]
-	var value string = args[2]
-	var data = store.NewData(value, expirationTime)
-
-	len := len(args)
-	switch {
-	case len == 3:
-		expirationTime = time.Now().Add(999999 * time.Hour)
-		data.ExpriredAt = expirationTime
-		s.SetValue(key, data)
-	case len == 5:
-		_expire, err := strconv.Atoi(args[4])
-		if err != nil {
-			return NON
-		}
-		expireDuration := time.Duration(_expire) * time.Microsecond
-		expirationTime := time.Now().Add(expireDuration)
-		data.ExpriredAt = expirationTime
-
-		s.SetValue(key, data)
-	case len > 5 || len < 3:
+func handleGET(s *store.Storage, args []string) string {
+	key := args[1]
+	value, ok := s.GetValue(key)
+	if !ok {
 		return NON
 	}
-	return OK
+	return fmt.Sprint(DOLLAR, len(value), SEPARATOR, value, SEPARATOR)
+}
 
+func handleSET(s *store.Storage, args []string) string {
+	len := len(args)
+	switch len {
+	case 3:
+		if err := handleSETWXP(s, args); err != nil {
+			return NON
+		}
+		return OK
+	case 5:
+		if err := handleSETXP(s, args); err != nil {
+			return NON
+		}
+		return OK
+	}
+	return NON
+
+}
+
+func handleSETWXP(s *store.Storage, args []string) error {
+	var expTime time.Time
+	var data *store.Data
+	key := args[1]
+	expTime = time.Now().Add(999999 * time.Hour)
+	data = store.NewData(args[2], expTime)
+	s.SetValue(key, data)
+	return nil
+}
+
+func handleSETXP(s *store.Storage, args []string) error {
+	var expTime time.Time
+	var data *store.Data
+	key := args[1]
+	timeXP, err := strconv.Atoi(args[4])
+	if err != nil {
+		return err
+	}
+	expTime = time.Now().Add(time.Duration(timeXP) * time.Millisecond)
+	data = store.NewData(args[2], expTime)
+	s.SetValue(key, data)
+	return nil
 }

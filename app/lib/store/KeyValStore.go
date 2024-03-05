@@ -13,12 +13,14 @@ type Data struct {
 	Value      string
 	ExpriredAt time.Time
 }
-func NewData(value string, expire time.Time )*Data{
+
+func NewData(value string, expire time.Time) *Data {
 	return &Data{
-		Value: value,
+		Value:      value,
 		ExpriredAt: expire,
 	}
 }
+
 type StoreWorker interface {
 	SetValue(key string, value Data)
 	GetValue(key string) (string, bool)
@@ -34,7 +36,7 @@ func (s *Storage) GetValue(key string) (string, bool) {
 	//s.mu.RLock()
 	data, OK := s.Store[key]
 	//s.mu.RUnlock()
-	if !OK || data.ExpriredAt.Before(time.Now()){
+	if !OK || data.ExpriredAt.Before(time.Now()) {
 		return "", OK
 	}
 	return data.Value, OK
