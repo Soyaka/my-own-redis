@@ -10,12 +10,17 @@ type Storage struct {
 }
 
 type Data struct {
-	Value     string
-	ExpireAt time.Time
+	Value      string
+	ExpriredAt time.Time
 }
-
+func NewData(value string, expire time.Time )*Data{
+	return &Data{
+		Value: value,
+		ExpriredAt: expire,
+	}
+}
 type StoreWorker interface {
-	SetValue(key, value string)
+	SetValue(key string, value Data)
 	GetValue(key string) (string, bool)
 }
 
@@ -27,18 +32,16 @@ func NewStorage() *Storage {
 
 func (s *Storage) GetValue(key string) (string, bool) {
 	//s.mu.RLock()
-	// defer s.mu.RUnlock()
-
 	data, OK := s.Store[key]
-	if !OK || !time.Now().Before(data.ExpireAt) {
+	//s.mu.RUnlock()
+	if !OK || data.ExpriredAt.Before(time.Now()){
 		return "", OK
 	}
 	return data.Value, OK
 }
 
-func (s *Storage) SetValue(key string, data Data) {
+func (s *Storage) SetValue(key string, Data *Data) {
 	//s.mu.Lock()
-	//defer s.mu.Unlock()
-	s.Store[key] = data
-	
+	s.Store[key] = *Data
+	//s.mu.Unlock()
 }
