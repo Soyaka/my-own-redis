@@ -14,6 +14,7 @@ const (
 	PONG      string = "+PONG\r\n"
 	ECHO      string = "ECHO"
 	SET       string = "SET"
+	INFO      string = "INFO"
 	GET       string = "GET"
 	OK        string = "+OK\r\n"
 	NON       string = "$-1\r\n"
@@ -38,5 +39,3 @@ func BulkDecoder(args []string) []string {
 	}
 	return elements
 }
-
-//3

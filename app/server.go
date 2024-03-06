@@ -32,12 +32,12 @@ func main() {
 			fmt.Println("Error:", err)
 			continue
 		}
-		go handleConnection(conn, Storage)
+		go handleConnection(conn, Storage, port)
 
 	}
 }
 
-func handleConnection(conn net.Conn, Storage *store.Storage) {
+func handleConnection(conn net.Conn, Storage *store.Storage, port string) {
 	defer func() {
 		conn.Close()
 	}()
@@ -53,7 +53,7 @@ func handleConnection(conn net.Conn, Storage *store.Storage) {
 		}
 		SlimBuf := parser.WhiteSpaceTrimmer(string(buf[:len]))
 		DecodedBuf := parser.BulkDecoder(SlimBuf)
-		Resp := parser.CommandChecker(Storage, DecodedBuf)
+		Resp := parser.CommandChecker(Storage, DecodedBuf, port)
 		_, err = conn.Write([]byte(Resp))
 		if err != nil {
 			conn.Close()
