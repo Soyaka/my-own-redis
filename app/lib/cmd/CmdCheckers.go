@@ -1,13 +1,13 @@
-package parser
+package cmd
 
 import (
 	"fmt"
 	"strings"
 
-	"github.com/codecrafters-io/redis-starter-go/app/lib/store"
+	store "github.com/codecrafters-io/redis-starter-go/app/lib/storage"
 )
 
-func CommandChecker(s *store.Storage, elements []string , port string) string {
+func CommandChecker(s *store.Storage, elements []string, port string) string {
 	var response string
 	switch strings.ToUpper(elements[0]) {
 	case PING:

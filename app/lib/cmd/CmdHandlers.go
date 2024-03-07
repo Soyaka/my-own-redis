@@ -1,4 +1,4 @@
-package parser
+package cmd
 
 import (
 	"fmt"
@@ -6,7 +6,23 @@ import (
 	"strings"
 	"time"
 
-	"github.com/codecrafters-io/redis-starter-go/app/lib/store"
+	store "github.com/codecrafters-io/redis-starter-go/app/lib/storage"
+)
+
+const (
+	SEPARATOR string = "\r\n"
+	PLUS      string = "+"
+	MINUS     string = "-"
+	DOLLAR    string = "$"
+	STAR      string = "*"
+	PING      string = "PING"
+	PONG      string = "+PONG\r\n"
+	ECHO      string = "ECHO"
+	SET       string = "SET"
+	INFO      string = "INFO"
+	GET       string = "GET"
+	OK        string = "+OK\r\n"
+	NON       string = "$-1\r\n"
 )
 
 func handleECHO(elements []string) string {
@@ -71,6 +87,9 @@ func handleSETXP(s *store.Storage, args []string) error {
 	s.SetValue(key, data)
 	return nil
 }
+
+// FIXME: fix the info function where i have to set it
+// asGeneral handler for info
 
 func handleInfo(args []string, port string) string {
 	switch strings.ToLower(args[1]) {
