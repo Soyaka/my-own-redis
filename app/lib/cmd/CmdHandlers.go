@@ -105,9 +105,9 @@ func handleInfo(args []string, server *server.ServerCred) string {
 	for _, resp := range rsSlice {
 		response += fmt.Sprint(DOLLAR,len(resp),SEPARATOR,resp,SEPARATOR)
 	}
-	if len(rsSlice) > 0 {
-		response = fmt.Sprint(STAR,len(rsSlice),SEPARATOR,response)
-	}
+	// if len(rsSlice) > 1 {
+	// 	response = fmt.Sprint(STAR,len(rsSlice),SEPARATOR,response)
+	// }
 	
 	return response 
 }
