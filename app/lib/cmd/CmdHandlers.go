@@ -88,7 +88,6 @@ func handleSETXP(s *store.Storage, args []string) error {
 	return nil
 }
 
-
 func handleInfo(args []string, role string) string {
 	switch strings.ToLower(args[1]) {
 	case "replication":
@@ -98,7 +97,7 @@ func handleInfo(args []string, role string) string {
 		} else {
 			Role += "slave"
 		}
-		return fmt.Sprint(DOLLAR, len(role), SEPARATOR, role, SEPARATOR)
+		return fmt.Sprint(DOLLAR, len(role), SEPARATOR, Role, SEPARATOR)
 	}
 	return NON
 }

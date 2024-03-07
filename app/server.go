@@ -16,6 +16,9 @@ const (
 
 func main() {
 	server := server.StratServer()
+	if server == nil {
+		return
+	}
 	Port := ":" + server.Port
 	Role := server.Role
 	listener, err := net.Listen(TCP, Port)

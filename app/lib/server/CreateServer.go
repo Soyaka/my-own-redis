@@ -8,47 +8,6 @@ import (
 	"github.com/google/uuid"
 )
 
-// type Server interface {
-
-// }
-
-// type Kernel struct{
-// 	Server Server
-// }
-
-// func (k *Kernel) Serve() {
-// 	k.Server = MakeServer()
-// 	if k.Server != nil {
-// 		StartServer(k.Server)
-// 	}
-// }
-
-// func (k *Kernel) GetServerInfo() {
-// 	if k.Server == nil {
-// 		fmt.Println("Invalid arguments. Please use --port <port number>")
-// 	}
-
-// }
-
-// func StartServer(server Server) {
-// 	listener, err := net.Listen(TCP, Port)
-// 	if err != nil {
-// 		fmt.Println("Error:", err)
-// 		return
-// 	}
-// 	defer listener.Close()
-// 	fmt.Println("Listening on:", Port)
-// 	for {
-// 		conn, err := listener.Accept()
-// 		if err != nil {
-// 			fmt.Println("Error:", err)
-// 			continue
-// 		}
-// 		// Implement logic to handle connections
-// 		 go connect.HandleConnection(conn, Storage, Port)
-// 	}
-// }
-
 type Server *ServerCred
 
 func MakeServer() *ServerCred {
