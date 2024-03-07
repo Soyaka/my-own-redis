@@ -91,13 +91,13 @@ func handleSETXP(s *store.Storage, args []string) error {
 func handleInfo(args []string, role string) string {
 	switch strings.ToLower(args[1]) {
 	case "replication":
-		Role := "role:"
+		ServerRole := "role:"
 		if role == "master" {
-			Role += "master"
+			ServerRole += "master"
 		} else {
-			Role += "slave"
+			ServerRole += "slave"
 		}
-		return fmt.Sprint(DOLLAR, len(role), SEPARATOR, Role, SEPARATOR)
+		return fmt.Sprint(DOLLAR, len(ServerRole), SEPARATOR, ServerRole, SEPARATOR)
 	}
 	return NON
 }
