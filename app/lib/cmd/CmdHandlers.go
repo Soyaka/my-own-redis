@@ -96,18 +96,18 @@ func handleInfo(args []string, server *server.ServerCred) string {
 	case "REPLICATION":
 		if server.Role == "master" {
 			rsSlice = append(rsSlice, "role:master")
-			rsSlice = append(rsSlice, "master_replid:"+server.ID)
+			rsSlice = append(rsSlice, "master_replid:"+"8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb")
 			rsSlice = append(rsSlice, "master_repl_offset:0")
 		} else {
 			rsSlice = append(rsSlice, "role:slave")
 		}
 	}
 	for _, resp := range rsSlice {
-		response += fmt.Sprint(DOLLAR,len(resp),SEPARATOR,resp,SEPARATOR)
+		response += fmt.Sprint(DOLLAR, len(resp), SEPARATOR, resp, SEPARATOR)
 	}
 	// if len(rsSlice) > 1 {
 	// 	response = fmt.Sprint(STAR,len(rsSlice),SEPARATOR,response)
 	// }
-	
-	return response 
+
+	return response
 }
