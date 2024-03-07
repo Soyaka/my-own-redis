@@ -88,21 +88,17 @@ func handleSETXP(s *store.Storage, args []string) error {
 	return nil
 }
 
-// FIXME: fix the info function where i have to set it
-// asGeneral handler for info
 
-func handleInfo(args []string, port string) string {
+func handleInfo(args []string, role string) string {
 	switch strings.ToLower(args[1]) {
 	case "replication":
-		role := "role:"
-		if port == ":6379" {
-			role += "master"
+		Role := "role:"
+		if role == "master" {
+			Role += "master"
 		} else {
-			role += "slave"
+			Role += "slave"
 		}
 		return fmt.Sprint(DOLLAR, len(role), SEPARATOR, role, SEPARATOR)
 	}
 	return NON
 }
-
-//$11\r\nrole:master\r\n
