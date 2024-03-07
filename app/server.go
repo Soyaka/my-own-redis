@@ -20,7 +20,6 @@ func main() {
 		return
 	}
 	Port := ":" + server.Port
-	Role := server.Role
 	listener, err := net.Listen(TCP, Port)
 	if err != nil {
 		fmt.Println("Error:", err)
@@ -34,6 +33,6 @@ func main() {
 			fmt.Println("Error:", err)
 			continue
 		}
-		go connect.HandleConnection(conn, Storage, Role)
+		go connect.HandleConnection(conn, Storage, server)
 	}
 }

@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/codecrafters-io/redis-starter-go/app/lib/server"
 	store "github.com/codecrafters-io/redis-starter-go/app/lib/storage"
 )
 
-func CommandChecker(s *store.Storage, elements []string, role string) string {
+func CommandChecker(s *store.Storage, elements []string, server *server.ServerCred) string {
 	var response string
 	switch strings.ToUpper(elements[0]) {
 	case PING:
@@ -19,7 +20,7 @@ func CommandChecker(s *store.Storage, elements []string, role string) string {
 	case GET:
 		response = handleGET(s, elements)
 	case INFO:
-		response = handleInfo(elements, role)
+		response = handleInfo(elements, server)
 	}
 
 	return response

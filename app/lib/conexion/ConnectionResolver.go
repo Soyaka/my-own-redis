@@ -5,10 +5,11 @@ import (
 
 	"github.com/codecrafters-io/redis-starter-go/app/lib/cmd"
 	"github.com/codecrafters-io/redis-starter-go/app/lib/parser"
+	"github.com/codecrafters-io/redis-starter-go/app/lib/server"
 	store "github.com/codecrafters-io/redis-starter-go/app/lib/storage"
 )
 
-func HandleConnection(conn net.Conn, Storage *store.Storage, port string) {
+func HandleConnection(conn net.Conn, Storage *store.Storage, server *server.ServerCred) {
 	defer func() {
 		conn.Close()
 	}()
@@ -24,7 +25,7 @@ func HandleConnection(conn net.Conn, Storage *store.Storage, port string) {
 		}
 		SlimBuf := parser.WhiteSpaceTrimmer(string(buf[:len]))
 		DecodedBuf := parser.BulkDecoder(SlimBuf)
-		Resp := cmd.CommandChecker(Storage, DecodedBuf, port)
+		Resp := cmd.CommandChecker(Storage, DecodedBuf, server)
 		_, err = conn.Write([]byte(Resp))
 		if err != nil {
 			conn.Close()

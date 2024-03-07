@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/codecrafters-io/redis-starter-go/app/lib/server"
 	store "github.com/codecrafters-io/redis-starter-go/app/lib/storage"
 )
 
@@ -88,16 +89,25 @@ func handleSETXP(s *store.Storage, args []string) error {
 	return nil
 }
 
-func handleInfo(args []string, role string) string {
-	switch strings.ToLower(args[1]) {
-	case "replication":
-		ServerRole := "role:"
-		if role == "master" {
-			ServerRole += "master"
+func handleInfo(args []string, server *server.ServerCred) string {
+	var rsSlice []string
+	var response string
+	switch strings.ToUpper(args[1]) {
+	case "REPLICATION":
+		if server.Role == "master" {
+			rsSlice = append(rsSlice, "role:master")
+			rsSlice = append(rsSlice, "master_replid:"+server.ID)
+			rsSlice = append(rsSlice, "master_repl_offset:0")
 		} else {
-			ServerRole += "slave"
+			rsSlice = append(rsSlice, "role:slave")
 		}
-		return fmt.Sprint(DOLLAR, len(ServerRole), SEPARATOR, ServerRole, SEPARATOR)
 	}
-	return NON
+	for _, resp := range rsSlice {
+		response += fmt.Sprint(DOLLAR,len(resp),SEPARATOR,resp,SEPARATOR)
+	}
+	if len(rsSlice) > 0 {
+		response = fmt.Sprint(STAR,len(rsSlice),SEPARATOR,response)
+	}
+	
+	return response 
 }
