@@ -91,7 +91,6 @@ func handleSETXP(s *store.Storage, args []string) error {
 
 func handleInfo(args []string, server *server.ServerCred) string {
 	var rsSlice []string
-	var response string
 	switch strings.ToUpper(args[1]) {
 	case "REPLICATION":
 		if server.Role == "master" {
@@ -102,12 +101,21 @@ func handleInfo(args []string, server *server.ServerCred) string {
 			rsSlice = append(rsSlice, "role:slave")
 		}
 	}
+	var response strings.Builder
 	for _, resp := range rsSlice {
-		response += fmt.Sprint(DOLLAR, len(resp), SEPARATOR, resp, SEPARATOR)
+		response.WriteString(fmt.Sprint(DOLLAR, len(resp), SEPARATOR, resp, SEPARATOR))
 	}
-	// if len(rsSlice) > 1 {
-	// 	response = fmt.Sprint(STAR,len(rsSlice),SEPARATOR,response)
-	// }
 
-	return response
+	if len(rsSlice) >= 2 {
+		response.WriteString(fmt.Sprint(STAR, len(rsSlice), SEPARATOR, response.String(), SEPARATOR))
+	}
+
+	return response.String()
 }
+// remote: [replication-4] Running tests for Replication > Stage #4: Initial Replication ID and Offset
+// remote: [replication-4] $ ./spawn_redis_server.sh
+// remote: [replication-4] $ redis-cli INFO replication
+// remote: [replication-4] Expected: 'master_replid' key in INFO replication.
+// remote: [replication-4] Test failed
+// remote: [replication-4] Terminating program
+// remote: [replication-4] Program terminated successfully
