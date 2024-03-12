@@ -20,7 +20,8 @@ func main() {
 		return
 	}
 	Port := ":" + server.Port
-	listener, err := net.Listen(TCP, Port)
+	fmt.Print("running on ", Port)
+	listener, err := net.Listen(TCP, server.Host+Port)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return

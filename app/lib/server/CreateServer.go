@@ -15,7 +15,7 @@ func MakeServer() *ServerCred {
 	switch len(args) {
 	case 0:
 		id := uuid.New()
-		return NewServerCred("localhost", "6379", id.String(), "master", "", "")
+		return NewServerCred("127.0.0.1", "6379", id.String(), "master", "", "")
 	case 2:
 		if strings.ToLower(args[0]) == "--port" {
 			port, err := strconv.Atoi(args[1])
@@ -23,7 +23,7 @@ func MakeServer() *ServerCred {
 				return nil
 			}
 			id := uuid.New()
-			return NewServerCred("localhost", strconv.Itoa(port), id.String(), "master", "", "")
+			return NewServerCred("127.0.0.1", strconv.Itoa(port), id.String(), "master", "", "")
 		}
 	case 5:
 		if strings.ToLower(args[0]) == "--port" {
@@ -37,7 +37,7 @@ func MakeServer() *ServerCred {
 				if err != nil {
 					return nil
 				}
-				return NewServerCred("localhost", strconv.Itoa(port), id.String(), "slave", args[3], strconv.Itoa(ParentPort))
+				return NewServerCred("127.0.0.1", strconv.Itoa(port), id.String(), "slave", args[3], strconv.Itoa(ParentPort))
 			}
 		}
 	}
@@ -45,7 +45,7 @@ func MakeServer() *ServerCred {
 
 }
 
-func StratServer() *ServerCred{
+func StratServer() *ServerCred {
 	server := MakeServer()
 	if server == nil {
 		return nil

@@ -88,34 +88,42 @@ func handleSETXP(s *store.Storage, args []string) error {
 	s.SetValue(key, data)
 	return nil
 }
-
 func handleInfo(args []string, server *server.ServerCred) string {
-	var rsSlice []string
-	switch strings.ToUpper(args[1]) {
-	case "REPLICATION":
+	switch strings.ToLower(args[1]) {
+	case "replication":
 		if server.Role == "master" {
-			rsSlice = append(rsSlice, "role:master")
-			rsSlice = append(rsSlice, "master_replid:8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb")
-			rsSlice = append(rsSlice, "master_repl_offset:0")
+			replicas := &ReplicationInfo{
+				Role:             "master",
+				MasterReplID:     "8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb",
+				MasterReplOffset: 0,
+			}
+			response := replicas.encodeRespRepl()
+			return fmt.Sprintf("$%d\r\n%s\r\n", len(response), response)
+
 		} else {
-			rsSlice = append(rsSlice, "role:slave")
+			arg := "role:slave"
+			response := fmt.Sprint(DOLLAR + fmt.Sprint(len(arg)) + SEPARATOR + arg + SEPARATOR)
+			return response
+
 		}
 	}
-	var response strings.Builder
-	for _, resp := range rsSlice {
-		response.WriteString(fmt.Sprint(DOLLAR, len(resp), SEPARATOR, resp, SEPARATOR))
-	}
-
-	if len(rsSlice) >= 2 {
-		response.WriteString(fmt.Sprint(STAR, len(rsSlice), SEPARATOR, response.String(), SEPARATOR))
-	}
-
-	return response.String()
+	return NON
 }
-// remote: [replication-4] Running tests for Replication > Stage #4: Initial Replication ID and Offset
-// remote: [replication-4] $ ./spawn_redis_server.sh
-// remote: [replication-4] $ redis-cli INFO replication
-// remote: [replication-4] Expected: 'master_replid' key in INFO replication.
-// remote: [replication-4] Test failed
-// remote: [replication-4] Terminating program
-// remote: [replication-4] Program terminated successfully
+
+func (r ReplicationInfo) encodeRespRepl() string {
+	builder := strings.Builder{}
+	builder.WriteString("role:" + r.Role)
+	builder.WriteString(SEPARATOR)
+	builder.WriteString("master_replid:" + r.MasterReplID)
+	builder.WriteString(SEPARATOR)
+	builder.WriteString("master_repl_offset:" + strconv.Itoa(r.MasterReplOffset))
+	builder.WriteString(SEPARATOR)
+	return fmt.Sprint(builder.String())
+
+}
+
+type ReplicationInfo struct {
+	Role             string
+	MasterReplID     string
+	MasterReplOffset int
+}
