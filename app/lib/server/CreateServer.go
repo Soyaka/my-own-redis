@@ -1,6 +1,8 @@
 package server
 
 import (
+	"fmt"
+	"net"
 	"os"
 	"strconv"
 	"strings"
@@ -50,5 +52,25 @@ func StratServer() *ServerCred {
 	if server == nil {
 		return nil
 	}
+	if server.Role == "slave" {
+		err := server.ConnectReplica()
+		if err != nil {
+			fmt.Println("can not coonect to parrent")
+		}
+	}
+
 	return server
+}
+
+func (S *ServerCred) ConnectReplica() error {
+	dial, err := net.Dial("tcp", S.Parent+":"+S.PrntPort)
+	if err != nil {
+		return err
+	}
+	_, err = dial.Write([]byte("*1\r\n$4\r\nping\r\n"))
+	if err != nil {
+		return err
+	}
+	return nil
+
 }
