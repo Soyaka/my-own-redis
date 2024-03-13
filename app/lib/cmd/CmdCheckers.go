@@ -21,7 +21,10 @@ func CommandChecker(s *store.Storage, elements []string, server *server.ServerCr
 		response = handleGET(s, elements)
 	case INFO:
 		response = handleInfo(elements, server)
+	case REPLCONF:
+			response = OK
 	}
+	
 
 	return response
 }

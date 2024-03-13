@@ -10,7 +10,9 @@ import (
 	"github.com/google/uuid"
 )
 
-type Server *ServerCred
+const (
+	OK string = "+OK\r\n"
+)
 
 func MakeServer() *ServerCred {
 	args := os.Args[1:]
@@ -53,24 +55,69 @@ func StratServer() *ServerCred {
 		return nil
 	}
 	if server.Role == "slave" {
-		err := server.ConnectReplica()
-		if err != nil {
-			fmt.Println("can not coonect to parrent")
-		}
+		go server.ConnectReplica()
 	}
 
 	return server
 }
 
-func (S *ServerCred) ConnectReplica() error {
-	dial, err := net.Dial("tcp", S.Parent+":"+S.PrntPort)
+func (S *ServerCred) ConnectReplica() {
+	conn, err := net.Dial("tcp", S.Parent+":"+S.PrntPort)
 	if err != nil {
-		return err
+		fmt.Println("#ConnectReplica:faled to connect")
 	}
-	_, err = dial.Write([]byte("*1\r\n$4\r\nping\r\n"))
+	defer conn.Close()
+	_, err = conn.Write([]byte("*1\r\n$4\r\nping\r\n"))
 	if err != nil {
-		return err
+		fmt.Println("#ConnectReplica:faled to  ping")
 	}
-	return nil
+	buf := make([]byte, 1024)
+	_, err = conn.Read(buf)
+	if err != nil {
+		fmt.Println("#ConnectReplica:faled to read pong")
+	}
+	fmt.Printf("%s", string(buf))
+	_, err = S.SendRelconfPort(conn)
+	if err != nil {
+		fmt.Println("#ConnectReplica:faled send port")
+	}
+	_, err = S.SendRelconfCapa(conn)
+	if err != nil {
+		fmt.Println("#ConnectReplica:failed to send capa")
+	}
 
+}
+
+func (S *ServerCred) SendRelconfPort(conn net.Conn) ([]byte, error) {
+	buff := make([]byte, 1024)
+
+	msg := fmt.Sprint("*3\r\n$8\r\nREPLCONF\r\n$14\r\nlistening-port\r\n$4\r\n", S.Port, "\r\n")
+	_, err := conn.Write([]byte(msg))
+	if err != nil {
+		return buff, err
+	}
+
+	_, err = conn.Read(buff)
+	if err != nil {
+		return buff, err
+	}
+
+	return buff, nil
+
+}
+
+func (S *ServerCred) SendRelconfCapa(conn net.Conn) ([]byte, error) {
+	buff := make([]byte, 1024)
+	msg := []byte("*3\r\n$8\r\nREPLCONF\r\n$4\r\ncapa\r\n$6\r\npsync2\r\n")
+	_, err := conn.Write(msg)
+	if err != nil {
+		return buff, err
+	}
+
+	_, err = conn.Read(buff)
+	if err != nil {
+		return buff, err
+	}
+
+	return buff, nil
 }

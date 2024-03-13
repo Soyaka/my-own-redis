@@ -24,6 +24,7 @@ const (
 	GET       string = "GET"
 	OK        string = "+OK\r\n"
 	NON       string = "$-1\r\n"
+	REPLCONF  string = "REPLCONF"
 )
 
 func handleECHO(elements []string) string {
