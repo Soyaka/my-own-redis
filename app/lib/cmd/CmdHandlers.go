@@ -14,17 +14,19 @@ const (
 	SEPARATOR string = "\r\n"
 	PLUS      string = "+"
 	MINUS     string = "-"
-	DOLLAR    string = "$"
-	STAR      string = "*"
-	PING      string = "PING"
-	PONG      string = "+PONG\r\n"
-	ECHO      string = "ECHO"
-	SET       string = "SET"
-	INFO      string = "INFO"
-	GET       string = "GET"
-	OK        string = "+OK\r\n"
-	NON       string = "$-1\r\n"
-	REPLCONF  string = "REPLCONF"
+	//FULLSYNC  string = "+FULLRESYNC <REPL_ID> 0\r\n"
+	PSYNC    string = "PSYNC"
+	DOLLAR   string = "$"
+	STAR     string = "*"
+	PING     string = "PING"
+	PONG     string = "+PONG\r\n"
+	ECHO     string = "ECHO"
+	SET      string = "SET"
+	INFO     string = "INFO"
+	GET      string = "GET"
+	OK       string = "+OK\r\n"
+	NON      string = "$-1\r\n"
+	REPLCONF string = "REPLCONF"
 )
 
 func handleECHO(elements []string) string {
@@ -109,6 +111,11 @@ func handleInfo(args []string, server *server.ServerCred) string {
 		}
 	}
 	return NON
+}
+
+func handlePsync(server *server.ServerCred) string {
+	response := "+FULLRESYNC"+fmt.Sprint(server.ID)+SEPARATOR
+	return response
 }
 
 func (r ReplicationInfo) encodeRespRepl() string {

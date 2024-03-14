@@ -11,7 +11,12 @@ import (
 )
 
 const (
-	OK string = "+OK\r\n"
+	PING        string = "*1\r\n$4\r\nping\r\n"
+	PONG        string = "+PONG\r\n"
+	OK          string = "+OK\r\n"
+	RPLCONFPORT string = "*3\r\n$8\r\nREPLCONF\r\n$14\r\nlistening-port\r\n$4\r\n6380\r\n"
+	RPLCONFCAPA string = "*3\r\n$8\r\nREPLCONF\r\n$4\r\ncapa\r\n$6\r\npsync2\r\n"
+	PSYNC       string = "*3\r\n$5\r\nPSYNC\r\n$1\r\n?\r\n$2\r\n-1\r\n"
 )
 
 func MakeServer() *ServerCred {
@@ -61,63 +66,51 @@ func StratServer() *ServerCred {
 	return server
 }
 
-func (S *ServerCred) ConnectReplica() {
+//TODO: PUT ALL THE CODE BELLOW IN A SPECIFIC PACKAGE FOR REPLICA
+
+func (S ServerCred) ConnectReplica() {
+	msgList := []string{
+		PING,
+		RPLCONFPORT,
+		RPLCONFCAPA,
+		PSYNC,
+	}
+	msgMap := map[string]string{
+		PING:        PONG,
+		RPLCONFPORT: OK,
+		RPLCONFCAPA: OK,
+		PSYNC:       OK,
+	}
+
 	conn, err := net.Dial("tcp", S.Parent+":"+S.PrntPort)
 	if err != nil {
-		fmt.Println("#ConnectReplica:faled to connect")
+		fmt.Println("#ConnectReplica:failed to connect")
 	}
 	defer conn.Close()
-	_, err = conn.Write([]byte("*1\r\n$4\r\nping\r\n"))
-	if err != nil {
-		fmt.Println("#ConnectReplica:faled to  ping")
-	}
-	buf := make([]byte, 1024)
-	_, err = conn.Read(buf)
-	if err != nil {
-		fmt.Println("#ConnectReplica:faled to read pong")
-	}
-	fmt.Printf("%s", string(buf))
-	_, err = S.SendRelconfPort(conn)
-	if err != nil {
-		fmt.Println("#ConnectReplica:faled send port")
-	}
-	_, err = S.SendRelconfCapa(conn)
-	if err != nil {
-		fmt.Println("#ConnectReplica:failed to send capa")
+	for _, msg := range msgList {
+		resp, err := S.SendHandshake(conn, msg)
+		if err != nil {
+			fmt.Println("#ConnectReplica: err ", err)
+			break
+		}
+		if string(resp) != msgMap[msg] {
+			fmt.Println("#ConnectReplica: response dows not match", string(resp))
+		} else {
+			fmt.Println(string(resp))
+		}
 	}
 
 }
 
-func (S *ServerCred) SendRelconfPort(conn net.Conn) ([]byte, error) {
+func (S ServerCred) SendHandshake(conn net.Conn, msg string) ([]byte, error) {
 	buff := make([]byte, 1024)
-
-	msg := fmt.Sprint("*3\r\n$8\r\nREPLCONF\r\n$14\r\nlistening-port\r\n$4\r\n", S.Port, "\r\n")
 	_, err := conn.Write([]byte(msg))
 	if err != nil {
 		return buff, err
 	}
-
 	_, err = conn.Read(buff)
 	if err != nil {
 		return buff, err
 	}
-
-	return buff, nil
-
-}
-
-func (S *ServerCred) SendRelconfCapa(conn net.Conn) ([]byte, error) {
-	buff := make([]byte, 1024)
-	msg := []byte("*3\r\n$8\r\nREPLCONF\r\n$4\r\ncapa\r\n$6\r\npsync2\r\n")
-	_, err := conn.Write(msg)
-	if err != nil {
-		return buff, err
-	}
-
-	_, err = conn.Read(buff)
-	if err != nil {
-		return buff, err
-	}
-
 	return buff, nil
 }

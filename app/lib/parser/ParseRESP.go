@@ -5,8 +5,8 @@ import (
 )
 
 const (
-	DOLLAR    string = "$"
-	STAR      string = "*"
+	DOLLAR string = "$"
+	STAR   string = "*"
 )
 
 //1

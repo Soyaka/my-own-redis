@@ -22,9 +22,10 @@ func CommandChecker(s *store.Storage, elements []string, server *server.ServerCr
 	case INFO:
 		response = handleInfo(elements, server)
 	case REPLCONF:
-			response = OK
+		response = OK
+	case PSYNC:
+		response = handlePsync(server)
 	}
-	
 
 	return response
 }
